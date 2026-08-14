@@ -5,6 +5,7 @@ const morgan = require("morgan");
 
 const config = require("./config/env");
 const connectDB = require("./config/db");
+const healthRoutes = require("./modules/health/health.routes");
 
 // Create Express app
 const app = express();
@@ -19,14 +20,8 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(morgan("dev"));
 
-// Health check route
-app.get("/health", (req, res) => {
-  res.json({
-    status: "ok",
-    uptime: process.uptime(),
-    timestamp: new Date().toISOString(),
-  });
-});
+// Mount health module
+app.use("/health", healthRoutes);
 
 // 404 handler for unknown routes
 app.use((req, res, next) => {
@@ -48,7 +43,7 @@ app.use((err, req, res, next) => {
 // Start server
 const server = app.listen(config.port, () => {
   console.log(
-    `Server running in ${config.nodeEnv} mode on port ${config.port}`,
+    `🚀 Server running in ${config.nodeEnv} mode on port ${config.port}`,
   );
 });
 
