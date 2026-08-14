@@ -2,6 +2,7 @@ const express = require("express");
 const cors = require("cors");
 const helmet = require("helmet");
 const morgan = require("morgan");
+const logger = require("./utils/logger");
 
 const config = require("./config/env");
 const connectDB = require("./config/db");
@@ -33,7 +34,7 @@ app.use((req, res, next) => {
 
 // Centralized error handler
 app.use((err, req, res, next) => {
-  console.error(err.stack);
+  logger.error(err.stack);
   res.status(err.status || 500).json({
     success: false,
     message: err.message || "Internal Server Error",
@@ -42,8 +43,8 @@ app.use((err, req, res, next) => {
 
 // Start server
 const server = app.listen(config.port, () => {
-  console.log(
-    `🚀 Server running in ${config.nodeEnv} mode on port ${config.port}`,
+  logger.info(
+    `Server running in ${config.nodeEnv} mode on port ${config.port}`,
   );
 });
 
