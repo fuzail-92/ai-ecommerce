@@ -18,6 +18,18 @@ const getMe = asyncHandler(async (req, res) => {
   });
 });
 
+// Get all users (admin only)
+const getAllUsers = asyncHandler(async (req, res) => {
+  const users = await User.find({}).select("-password");
+
+  res.status(200).json({
+    success: true,
+    count: users.length,
+    data: users,
+  });
+});
+
 module.exports = {
   getMe,
+  getAllUsers,
 };
