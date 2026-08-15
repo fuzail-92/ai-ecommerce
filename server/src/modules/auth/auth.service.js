@@ -4,25 +4,40 @@ const AppError = require("../../utils/appError");
 const User = require("../users/user.model");
 const config = require("../../config/env");
 
+// ⚠️ In-memory refresh token store — development only
+// In production, replace with Redis or database.
+const refreshTokenStore = new Set();
+
+// Store a refresh token
+const storeRefreshToken = (token) => {
+  refreshTokenStore.add(token);
+};
+
+// Check if a refresh token is valid
+const isRefreshTokenValid = (token) => {
+  return refreshTokenStore.has(token);
+};
+
+// Revoke a refresh token
+const revokeRefreshToken = (token) => {
+  refreshTokenStore.delete(token);
+};
+
 // Register a new user
 const registerUser = async ({ name, email, password }) => {
-  // Check if user already exists
   const existingUser = await User.findOne({ email });
   if (existingUser) {
     throw new AppError("Email already registered", 409);
   }
 
-  // Hash password
   const hashedPassword = await bcrypt.hash(password, 12);
 
-  // Create new user
   const user = await User.create({
     name,
     email,
     password: hashedPassword,
   });
 
-  // Return safe user object (without password)
   return {
     id: user._id,
     name: user.name,
@@ -34,31 +49,31 @@ const registerUser = async ({ name, email, password }) => {
 
 // Login a user
 const loginUser = async ({ email, password }) => {
-  // Find user by email and include password field
   const user = await User.findOne({ email }).select("+password");
 
-  // If user not found, throw generic error (do not reveal which was wrong)
   if (!user) {
     throw new AppError("Invalid email or password", 401);
   }
 
-  // Compare provided password with stored hash
   const isPasswordMatch = await bcrypt.compare(password, user.password);
   if (!isPasswordMatch) {
     throw new AppError("Invalid email or password", 401);
   }
 
-  // Generate access token (short-lived)
+  // Generate access token
   const accessToken = jwt.sign(
     { userId: user._id, role: user.role },
     config.jwtAccessSecret,
     { expiresIn: config.jwtAccessExpiresIn },
   );
 
-  // Generate refresh token (long-lived)
+  // Generate refresh token
   const refreshToken = jwt.sign({ userId: user._id }, config.jwtRefreshSecret, {
     expiresIn: config.jwtRefreshExpiresIn,
   });
+
+  // Store refresh token
+  storeRefreshToken(refreshToken);
 
   return {
     user: {
@@ -72,7 +87,72 @@ const loginUser = async ({ email, password }) => {
   };
 };
 
+// Refresh access token using a valid refresh token
+const refreshAccessToken = async ({ refreshToken }) => {
+  if (!refreshToken) {
+    throw new AppError("Refresh token is required", 400);
+  }
+
+  // Verify the refresh token
+  let decoded;
+  try {
+    decoded = jwt.verify(refreshToken, config.jwtRefreshSecret);
+  } catch (error) {
+    throw new AppError("Invalid or expired refresh token", 401);
+  }
+
+  // Check if refresh token is still valid in our store
+  if (!isRefreshTokenValid(refreshToken)) {
+    throw new AppError("Refresh token has been revoked", 401);
+  }
+
+  // Fetch the user from database
+  const user = await User.findById(decoded.userId);
+
+  if (!user) {
+    throw new AppError("User no longer exists", 401);
+  }
+
+  if (!user.isActive) {
+    throw new AppError("Account is disabled", 401);
+  }
+
+  // Generate new access token
+  const newAccessToken = jwt.sign(
+    { userId: user._id, role: user.role },
+    config.jwtAccessSecret,
+    { expiresIn: config.jwtAccessExpiresIn },
+  );
+
+  // Generate new refresh token
+  const newRefreshToken = jwt.sign(
+    { userId: user._id },
+    config.jwtRefreshSecret,
+    { expiresIn: config.jwtRefreshExpiresIn },
+  );
+
+  // Token rotation: revoke old refresh token, store new one
+  revokeRefreshToken(refreshToken);
+  storeRefreshToken(newRefreshToken);
+
+  return {
+    accessToken: newAccessToken,
+    refreshToken: newRefreshToken,
+  };
+};
+
+// Logout user by revoking refresh token
+const logoutUser = async ({ refreshToken }) => {
+  if (refreshToken && isRefreshTokenValid(refreshToken)) {
+    revokeRefreshToken(refreshToken);
+  }
+
+  return { success: true };
+};
+
 module.exports = {
   registerUser,
   loginUser,
+  refreshAccessToken,
+  logoutUser,
 };
