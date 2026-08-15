@@ -1,6 +1,6 @@
 const bcrypt = require("bcrypt");
 const AppError = require("../../utils/appError");
-const User = require("../users/user.model");
+const User = require("../user.model");
 
 // Register a new user
 const registerUser = async ({ name, email, password }) => {
