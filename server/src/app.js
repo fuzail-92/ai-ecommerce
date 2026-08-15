@@ -7,6 +7,7 @@ const logger = require("./utils/logger");
 const config = require("./config/env");
 const connectDB = require("./config/db");
 const healthRoutes = require("./modules/health/health.routes");
+const authRoutes = require("./modules/auth/auth.routes");
 
 // Create Express app
 const app = express();
@@ -23,6 +24,9 @@ app.use(morgan("dev"));
 
 // Mount health module
 app.use("/health", healthRoutes);
+
+// Mount auth module
+app.use("/api/v1/auth", authRoutes);
 
 // 404 handler for unknown routes
 app.use((req, res, next) => {
