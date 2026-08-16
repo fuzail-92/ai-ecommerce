@@ -4,7 +4,7 @@ const userController = require("./user.controller");
 const authMiddleware = require("../../middleware/auth.middleware");
 const authorize = require("../../middleware/authorize.middleware");
 
-// Protected route: get current user profile
+// Protected route: get current user profile (basic)
 router.get("/me", authMiddleware.protect, userController.getMe);
 
 // Admin-only route: get all users
@@ -13,6 +13,32 @@ router.get(
   authMiddleware.protect,
   authorize("admin"),
   userController.getAllUsers,
+);
+
+// Protected route: get detailed profile
+router.get("/profile", authMiddleware.protect, userController.getProfile);
+
+// Protected route: update profile
+router.put("/profile", authMiddleware.protect, userController.updateProfile);
+
+// Protected route: change password
+router.put(
+  "/change-password",
+  authMiddleware.protect,
+  userController.changePassword,
+);
+
+// Address routes
+router.post("/addresses", authMiddleware.protect, userController.addAddress);
+router.put(
+  "/addresses/:addressId",
+  authMiddleware.protect,
+  userController.updateAddress,
+);
+router.delete(
+  "/addresses/:addressId",
+  authMiddleware.protect,
+  userController.deleteAddress,
 );
 
 module.exports = router;
