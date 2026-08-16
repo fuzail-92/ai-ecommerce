@@ -1,5 +1,66 @@
 const mongoose = require("mongoose");
 
+// Address subdocument schema
+const addressSchema = new mongoose.Schema(
+  {
+    label: {
+      type: String,
+      enum: ["Home", "Work", "Other"],
+      default: "Home",
+    },
+
+    fullName: {
+      type: String,
+      required: [true, "Full name is required"],
+      trim: true,
+    },
+
+    phone: {
+      type: String,
+      required: [true, "Phone number is required"],
+      trim: true,
+    },
+
+    street: {
+      type: String,
+      required: [true, "Street address is required"],
+      trim: true,
+    },
+
+    city: {
+      type: String,
+      required: [true, "City is required"],
+      trim: true,
+    },
+
+    state: {
+      type: String,
+      required: [true, "State is required"],
+      trim: true,
+    },
+
+    postalCode: {
+      type: String,
+      required: [true, "Postal code is required"],
+      trim: true,
+    },
+
+    country: {
+      type: String,
+      required: [true, "Country is required"],
+      trim: true,
+    },
+
+    isDefault: {
+      type: Boolean,
+      default: false,
+    },
+  },
+  {
+    _id: true,
+  },
+);
+
 // User schema
 const userSchema = new mongoose.Schema(
   {
@@ -8,6 +69,7 @@ const userSchema = new mongoose.Schema(
       required: [true, "Name is required"],
       trim: true,
     },
+
     email: {
       type: String,
       required: [true, "Email is required"],
@@ -15,41 +77,54 @@ const userSchema = new mongoose.Schema(
       lowercase: true,
       trim: true,
     },
+
     password: {
       type: String,
       required: [true, "Password is required"],
       minlength: [6, "Password must be at least 6 characters"],
-      minlength: [6, "Password must be at least 6 characters"],
-      select: false, // do not return password in normal querie
+      select: false,
     },
+
     role: {
       type: String,
       enum: ["customer", "admin"],
       default: "customer",
     },
+
     isActive: {
       type: Boolean,
       default: true,
     },
+
     isEmailVerified: {
       type: Boolean,
       default: false,
     },
+
     passwordResetToken: {
       type: String,
       select: false,
     },
+
     passwordResetExpires: {
       type: Date,
       select: false,
     },
+
     emailVerificationToken: {
       type: String,
       select: false,
     },
+
     emailVerificationExpires: {
       type: Date,
       select: false,
+    },
+
+    // User addresses
+    addresses: {
+      type: [addressSchema],
+      default: [],
     },
   },
   {
