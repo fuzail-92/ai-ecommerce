@@ -13,4 +13,5 @@ const validate = (req, res, next) => {
   next();
 };
 
+// ✅ Export the function directly, NOT an object
 module.exports = validate;

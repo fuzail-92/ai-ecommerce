@@ -41,9 +41,27 @@ const logoutValidation = [
   body("refreshToken").notEmpty().withMessage("Refresh token is required"),
 ];
 
+// Validation rules for forgot password
+const forgotPasswordValidation = [
+  body("email")
+    .trim()
+    .isEmail()
+    .withMessage("Valid email is required")
+    .normalizeEmail(),
+];
+
+// Validation rules for reset password
+const resetPasswordValidation = [
+  body("newPassword")
+    .isLength({ min: 6 })
+    .withMessage("Password must be at least 6 characters"),
+];
+
 module.exports = {
   registerValidation,
   loginValidation,
   refreshValidation,
   logoutValidation,
+  forgotPasswordValidation,
+  resetPasswordValidation,
 };

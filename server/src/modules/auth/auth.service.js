@@ -1,5 +1,6 @@
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
+const crypto = require("crypto");
 const AppError = require("../../utils/appError");
 const User = require("../users/user.model");
 const config = require("../../config/env");
@@ -60,19 +61,16 @@ const loginUser = async ({ email, password }) => {
     throw new AppError("Invalid email or password", 401);
   }
 
-  // Generate access token
   const accessToken = jwt.sign(
     { userId: user._id, role: user.role },
     config.jwtAccessSecret,
     { expiresIn: config.jwtAccessExpiresIn },
   );
 
-  // Generate refresh token
   const refreshToken = jwt.sign({ userId: user._id }, config.jwtRefreshSecret, {
     expiresIn: config.jwtRefreshExpiresIn,
   });
 
-  // Store refresh token
   storeRefreshToken(refreshToken);
 
   return {
@@ -93,7 +91,6 @@ const refreshAccessToken = async ({ refreshToken }) => {
     throw new AppError("Refresh token is required", 400);
   }
 
-  // Verify the refresh token
   let decoded;
   try {
     decoded = jwt.verify(refreshToken, config.jwtRefreshSecret);
@@ -101,12 +98,10 @@ const refreshAccessToken = async ({ refreshToken }) => {
     throw new AppError("Invalid or expired refresh token", 401);
   }
 
-  // Check if refresh token is still valid in our store
   if (!isRefreshTokenValid(refreshToken)) {
     throw new AppError("Refresh token has been revoked", 401);
   }
 
-  // Fetch the user from database
   const user = await User.findById(decoded.userId);
 
   if (!user) {
@@ -117,21 +112,18 @@ const refreshAccessToken = async ({ refreshToken }) => {
     throw new AppError("Account is disabled", 401);
   }
 
-  // Generate new access token
   const newAccessToken = jwt.sign(
     { userId: user._id, role: user.role },
     config.jwtAccessSecret,
     { expiresIn: config.jwtAccessExpiresIn },
   );
 
-  // Generate new refresh token
   const newRefreshToken = jwt.sign(
     { userId: user._id },
     config.jwtRefreshSecret,
     { expiresIn: config.jwtRefreshExpiresIn },
   );
 
-  // Token rotation: revoke old refresh token, store new one
   revokeRefreshToken(refreshToken);
   storeRefreshToken(newRefreshToken);
 
@@ -150,9 +142,67 @@ const logoutUser = async ({ refreshToken }) => {
   return { success: true };
 };
 
+// Forgot password: generate reset token and log reset URL
+const forgotPassword = async ({ email }) => {
+  const user = await User.findOne({ email });
+
+  if (!user) {
+    // Do not reveal if email exists (prevent user enumeration)
+    throw new AppError("If email exists, a reset link has been sent", 200);
+  }
+
+  const resetToken = crypto.randomBytes(32).toString("hex");
+
+  const hashedToken = crypto
+    .createHash("sha256")
+    .update(resetToken)
+    .digest("hex");
+
+  user.passwordResetToken = hashedToken;
+  user.passwordResetExpires = Date.now() + 10 * 60 * 1000;
+
+  await user.save({ validateBeforeSave: false });
+
+  // In development, log the reset URL
+  const resetUrl = `http://localhost:5000/api/v1/auth/reset-password/${resetToken}`;
+  console.log(`🔗 Password reset link: ${resetUrl}`);
+
+  return {
+    message: "If email exists, a reset link has been sent",
+  };
+};
+
+// Reset password using token
+const resetPassword = async ({ token, newPassword }) => {
+  const hashedToken = crypto.createHash("sha256").update(token).digest("hex");
+
+  const user = await User.findOne({
+    passwordResetToken: hashedToken,
+    passwordResetExpires: { $gt: Date.now() },
+  });
+
+  if (!user) {
+    throw new AppError("Invalid or expired password reset token", 400);
+  }
+
+  const hashedPassword = await bcrypt.hash(newPassword, 12);
+
+  user.password = hashedPassword;
+  user.passwordResetToken = undefined;
+  user.passwordResetExpires = undefined;
+
+  await user.save();
+
+  return {
+    message: "Password reset successful",
+  };
+};
+
 module.exports = {
   registerUser,
   loginUser,
   refreshAccessToken,
   logoutUser,
+  forgotPassword,
+  resetPassword,
 };

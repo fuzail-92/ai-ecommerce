@@ -5,20 +5,41 @@ const validate = require("../../middleware/validate.middleware");
 const {
   registerValidation,
   loginValidation,
-  refreshValidation,
-  logoutValidation,
+  forgotPasswordValidation,
+  resetPasswordValidation,
 } = require("./auth.validation");
 
-// POST /api/v1/auth/register
-router.post("/register", registerValidation, validate, authController.register);
+// Register
+router.post(
+  "/register",
+  ...registerValidation,
+  validate,
+  authController.register,
+);
 
-// POST /api/v1/auth/login
-router.post("/login", loginValidation, validate, authController.login);
+// Login
+router.post("/login", ...loginValidation, validate, authController.login);
 
-// POST /api/v1/auth/refresh
-router.post("/refresh", refreshValidation, validate, authController.refresh);
+// Forgot password
+router.post(
+  "/forgot-password",
+  ...forgotPasswordValidation,
+  validate,
+  authController.forgotPassword,
+);
 
-// POST /api/v1/auth/logout
-router.post("/logout", logoutValidation, validate, authController.logout);
+// Reset password
+router.post(
+  "/reset-password/:token",
+  ...resetPasswordValidation,
+  validate,
+  authController.resetPassword,
+);
+
+// Refresh token
+router.post("/refresh", authController.refresh);
+
+// Logout
+router.post("/logout", authController.logout);
 
 module.exports = router;
