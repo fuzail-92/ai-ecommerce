@@ -42,4 +42,7 @@ router.post("/refresh", authController.refresh);
 // Logout
 router.post("/logout", authController.logout);
 
+// GET /api/v1/auth/verify-email/:token
+router.get("/verify-email/:token", authController.verifyEmail);
+
 module.exports = router;

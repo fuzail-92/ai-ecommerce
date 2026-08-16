@@ -43,6 +43,14 @@ const userSchema = new mongoose.Schema(
       type: Date,
       select: false,
     },
+    emailVerificationToken: {
+      type: String,
+      select: false,
+    },
+    emailVerificationExpires: {
+      type: Date,
+      select: false,
+    },
   },
   {
     timestamps: true,

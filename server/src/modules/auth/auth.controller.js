@@ -74,6 +74,18 @@ const resetPassword = asyncHandler(async (req, res) => {
   });
 });
 
+// Verify email
+const verifyEmail = asyncHandler(async (req, res) => {
+  const { token } = req.params;
+
+  const result = await authService.verifyEmail({ token });
+
+  res.status(200).json({
+    success: true,
+    message: result.message,
+  });
+});
+
 module.exports = {
   register,
   login,
@@ -81,4 +93,5 @@ module.exports = {
   logout,
   forgotPassword,
   resetPassword,
+  verifyEmail,
 };

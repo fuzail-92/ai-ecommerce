@@ -27,6 +27,7 @@ const revokeRefreshToken = (token) => {
 // Register a new user
 const registerUser = async ({ name, email, password }) => {
   const existingUser = await User.findOne({ email });
+
   if (existingUser) {
     throw new AppError("Email already registered", 409);
   }
@@ -38,6 +39,24 @@ const registerUser = async ({ name, email, password }) => {
     email,
     password: hashedPassword,
   });
+
+  // Generate email verification token
+  const verificationToken = crypto.randomBytes(32).toString("hex");
+
+  const hashedVerificationToken = crypto
+    .createHash("sha256")
+    .update(verificationToken)
+    .digest("hex");
+
+  user.emailVerificationToken = hashedVerificationToken;
+  user.emailVerificationExpires = Date.now() + 24 * 60 * 60 * 1000;
+
+  await user.save({ validateBeforeSave: false });
+
+  // Development: log verification URL
+  const verificationUrl = `http://localhost:5000/api/v1/auth/verify-email/${verificationToken}`;
+
+  console.log(`🔗 Email verification link: ${verificationUrl}`);
 
   return {
     id: user._id,
@@ -57,8 +76,13 @@ const loginUser = async ({ email, password }) => {
   }
 
   const isPasswordMatch = await bcrypt.compare(password, user.password);
+
   if (!isPasswordMatch) {
     throw new AppError("Invalid email or password", 401);
+  }
+
+  if (!user.isEmailVerified) {
+    throw new AppError("Please verify your email before login", 403);
   }
 
   const accessToken = jwt.sign(
@@ -92,6 +116,7 @@ const refreshAccessToken = async ({ refreshToken }) => {
   }
 
   let decoded;
+
   try {
     decoded = jwt.verify(refreshToken, config.jwtRefreshSecret);
   } catch (error) {
@@ -121,7 +146,9 @@ const refreshAccessToken = async ({ refreshToken }) => {
   const newRefreshToken = jwt.sign(
     { userId: user._id },
     config.jwtRefreshSecret,
-    { expiresIn: config.jwtRefreshExpiresIn },
+    {
+      expiresIn: config.jwtRefreshExpiresIn,
+    },
   );
 
   revokeRefreshToken(refreshToken);
@@ -142,12 +169,12 @@ const logoutUser = async ({ refreshToken }) => {
   return { success: true };
 };
 
-// Forgot password: generate reset token and log reset URL
+// Forgot password
 const forgotPassword = async ({ email }) => {
   const user = await User.findOne({ email });
 
   if (!user) {
-    // Do not reveal if email exists (prevent user enumeration)
+    // Do not reveal if email exists
     throw new AppError("If email exists, a reset link has been sent", 200);
   }
 
@@ -163,8 +190,9 @@ const forgotPassword = async ({ email }) => {
 
   await user.save({ validateBeforeSave: false });
 
-  // In development, log the reset URL
+  // Development: log reset URL
   const resetUrl = `http://localhost:5000/api/v1/auth/reset-password/${resetToken}`;
+
   console.log(`🔗 Password reset link: ${resetUrl}`);
 
   return {
@@ -198,6 +226,30 @@ const resetPassword = async ({ token, newPassword }) => {
   };
 };
 
+// Verify email using token
+const verifyEmail = async ({ token }) => {
+  const hashedToken = crypto.createHash("sha256").update(token).digest("hex");
+
+  const user = await User.findOne({
+    emailVerificationToken: hashedToken,
+    emailVerificationExpires: { $gt: Date.now() },
+  });
+
+  if (!user) {
+    throw new AppError("Invalid or expired verification token", 400);
+  }
+
+  user.isEmailVerified = true;
+  user.emailVerificationToken = undefined;
+  user.emailVerificationExpires = undefined;
+
+  await user.save();
+
+  return {
+    message: "Email verified successfully",
+  };
+};
+
 module.exports = {
   registerUser,
   loginUser,
@@ -205,4 +257,5 @@ module.exports = {
   logoutUser,
   forgotPassword,
   resetPassword,
+  verifyEmail,
 };
