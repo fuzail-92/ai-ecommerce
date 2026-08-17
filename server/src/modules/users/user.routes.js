@@ -30,15 +30,49 @@ router.put(
 
 // Address routes
 router.post("/addresses", authMiddleware.protect, userController.addAddress);
+
 router.put(
   "/addresses/:addressId",
   authMiddleware.protect,
   userController.updateAddress,
 );
+
 router.delete(
   "/addresses/:addressId",
   authMiddleware.protect,
   userController.deleteAddress,
+);
+
+// Admin: Get user by ID
+router.get(
+  "/:userId",
+  authMiddleware.protect,
+  authorize("admin"),
+  userController.getUserById,
+);
+
+// Admin: Update user role
+router.patch(
+  "/:userId/role",
+  authMiddleware.protect,
+  authorize("admin"),
+  userController.updateUserRole,
+);
+
+// Admin: Deactivate user
+router.patch(
+  "/:userId/deactivate",
+  authMiddleware.protect,
+  authorize("admin"),
+  userController.deactivateUser,
+);
+
+// Admin: Activate user
+router.patch(
+  "/:userId/activate",
+  authMiddleware.protect,
+  authorize("admin"),
+  userController.activateUser,
 );
 
 module.exports = router;

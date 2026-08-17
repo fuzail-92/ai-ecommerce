@@ -111,6 +111,35 @@ const deleteAddress = asyncHandler(async (req, res) => {
   });
 });
 
+// Admin: Get user by ID
+const getUserById = asyncHandler(async (req, res) => {
+  const { userId } = req.params;
+  const user = await userService.getUserById(userId);
+  res.status(200).json({ success: true, data: user });
+});
+
+// Admin: Update user role
+const updateUserRole = asyncHandler(async (req, res) => {
+  const { userId } = req.params;
+  const { role } = req.body;
+  const user = await userService.updateUserRole(userId, { role });
+  res.status(200).json({ success: true, data: user });
+});
+
+// Admin: Deactivate user
+const deactivateUser = asyncHandler(async (req, res) => {
+  const { userId } = req.params;
+  const user = await userService.deactivateUser(userId);
+  res.status(200).json({ success: true, data: user });
+});
+
+// Admin: Activate user
+const activateUser = asyncHandler(async (req, res) => {
+  const { userId } = req.params;
+  const user = await userService.activateUser(userId);
+  res.status(200).json({ success: true, data: user });
+});
+
 module.exports = {
   getMe,
   getAllUsers,
@@ -120,4 +149,8 @@ module.exports = {
   addAddress,
   updateAddress,
   deleteAddress,
+  getUserById,
+  updateUserRole,
+  deactivateUser,
+  activateUser,
 };

@@ -155,6 +155,91 @@ const deleteAddress = async (userId, addressId) => {
 
   return user.addresses;
 };
+// Admin: Get user by ID
+const getUserById = async (userId) => {
+  const user = await User.findById(userId);
+
+  if (!user) {
+    throw new AppError("User not found", 404);
+  }
+
+  return {
+    id: user._id,
+    name: user.name,
+    email: user.email,
+    role: user.role,
+    isActive: user.isActive,
+    isEmailVerified: user.isEmailVerified,
+    addresses: user.addresses,
+    createdAt: user.createdAt,
+    updatedAt: user.updatedAt,
+  };
+};
+
+// Admin: Update user role
+const updateUserRole = async (userId, { role }) => {
+  if (!["customer", "admin"].includes(role)) {
+    throw new AppError("Invalid role", 400);
+  }
+
+  const user = await User.findById(userId);
+
+  if (!user) {
+    throw new AppError("User not found", 404);
+  }
+
+  user.role = role;
+  await user.save();
+
+  return {
+    id: user._id,
+    name: user.name,
+    email: user.email,
+    role: user.role,
+    isActive: user.isActive,
+    isEmailVerified: user.isEmailVerified,
+  };
+};
+
+// Admin: Deactivate user
+const deactivateUser = async (userId) => {
+  const user = await User.findById(userId);
+
+  if (!user) {
+    throw new AppError("User not found", 404);
+  }
+
+  user.isActive = false;
+  await user.save();
+
+  return {
+    id: user._id,
+    name: user.name,
+    email: user.email,
+    role: user.role,
+    isActive: user.isActive,
+  };
+};
+
+// Admin: Activate user
+const activateUser = async (userId) => {
+  const user = await User.findById(userId);
+
+  if (!user) {
+    throw new AppError("User not found", 404);
+  }
+
+  user.isActive = true;
+  await user.save();
+
+  return {
+    id: user._id,
+    name: user.name,
+    email: user.email,
+    role: user.role,
+    isActive: user.isActive,
+  };
+};
 
 module.exports = {
   getUserProfile,
@@ -163,4 +248,8 @@ module.exports = {
   addAddress,
   updateAddress,
   deleteAddress,
+  getUserById,
+  updateUserRole,
+  deactivateUser,
+  activateUser,
 };
