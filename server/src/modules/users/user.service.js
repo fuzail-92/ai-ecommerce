@@ -1,4 +1,5 @@
 const AppError = require("../../utils/appError");
+
 const User = require("./user.model");
 
 // Get user profile by ID
@@ -30,13 +31,21 @@ const updateUserProfile = async (userId, { name, email }) => {
     throw new AppError("User not found", 404);
   }
 
-  if (name) user.name = name;
+  if (name) {
+    user.name = name;
+  }
+
   if (email) {
     // Check if email is already taken
-    const existingUser = await User.findOne({ email, _id: { $ne: userId } });
+    const existingUser = await User.findOne({
+      email,
+      _id: { $ne: userId },
+    });
+
     if (existingUser) {
       throw new AppError("Email already in use", 409);
     }
+
     user.email = email.toLowerCase();
   }
 
@@ -64,6 +73,7 @@ const changePassword = async (userId, { currentPassword, newPassword }) => {
   }
 
   const bcrypt = require("bcrypt");
+
   const isMatch = await bcrypt.compare(currentPassword, user.password);
 
   if (!isMatch) {
@@ -71,10 +81,14 @@ const changePassword = async (userId, { currentPassword, newPassword }) => {
   }
 
   const hashedPassword = await bcrypt.hash(newPassword, 12);
+
   user.password = hashedPassword;
+
   await user.save();
 
-  return { message: "Password changed successfully" };
+  return {
+    message: "Password changed successfully",
+  };
 };
 
 // Add address
@@ -85,15 +99,18 @@ const addAddress = async (userId, addressData) => {
     throw new AppError("User not found", 404);
   }
 
-  // If this is the first address or marked default, set others to false
+  // If this is the first address or marked default,
+  // set other addresses to false
   if (addressData.isDefault || user.addresses.length === 0) {
     user.addresses.forEach((addr) => {
       addr.isDefault = false;
     });
+
     addressData.isDefault = true;
   }
 
   user.addresses.push(addressData);
+
   await user.save();
 
   return user.addresses;
@@ -144,9 +161,11 @@ const deleteAddress = async (userId, addressId) => {
   }
 
   const wasDefault = address.isDefault;
+
   address.deleteOne();
 
-  // If deleted address was default, make the first remaining address default
+  // If deleted address was default,
+  // make the first remaining address default
   if (wasDefault && user.addresses.length > 0) {
     user.addresses[0].isDefault = true;
   }
@@ -155,6 +174,7 @@ const deleteAddress = async (userId, addressId) => {
 
   return user.addresses;
 };
+
 // Admin: Get user by ID
 const getUserById = async (userId) => {
   const user = await User.findById(userId);
@@ -189,6 +209,7 @@ const updateUserRole = async (userId, { role }) => {
   }
 
   user.role = role;
+
   await user.save();
 
   return {
@@ -210,6 +231,7 @@ const deactivateUser = async (userId) => {
   }
 
   user.isActive = false;
+
   await user.save();
 
   return {
@@ -230,6 +252,7 @@ const activateUser = async (userId) => {
   }
 
   user.isActive = true;
+
   await user.save();
 
   return {
@@ -239,6 +262,63 @@ const activateUser = async (userId) => {
     role: user.role,
     isActive: user.isActive,
   };
+};
+
+// Get user preferences
+const getUserPreferences = async (userId) => {
+  const user = await User.findById(userId);
+
+  if (!user) {
+    throw new AppError("User not found", 404);
+  }
+
+  return user.preferences;
+};
+
+// Update user preferences
+const updateUserPreferences = async (userId, preferencesData) => {
+  const user = await User.findById(userId);
+
+  if (!user) {
+    throw new AppError("User not found", 404);
+  }
+
+  // Make sure preferences exists
+  if (!user.preferences) {
+    user.preferences = {};
+  }
+
+  // Update language only if provided
+  if (preferencesData.language) {
+    user.preferences.language = preferencesData.language;
+  }
+
+  // Update currency only if provided
+  if (preferencesData.currency) {
+    user.preferences.currency = preferencesData.currency;
+  }
+
+  // Update notification preferences only if provided
+  if (preferencesData.notifications) {
+    const { orderUpdates, promotions, newsletter } =
+      preferencesData.notifications;
+
+    if (typeof orderUpdates === "boolean") {
+      user.preferences.notifications.orderUpdates = orderUpdates;
+    }
+
+    if (typeof promotions === "boolean") {
+      user.preferences.notifications.promotions = promotions;
+    }
+
+    if (typeof newsletter === "boolean") {
+      user.preferences.notifications.newsletter = newsletter;
+    }
+  }
+
+  await user.save();
+
+  return user.preferences;
 };
 
 module.exports = {
@@ -252,4 +332,6 @@ module.exports = {
   updateUserRole,
   deactivateUser,
   activateUser,
+  getUserPreferences,
+  updateUserPreferences,
 };

@@ -21,6 +21,18 @@ router.get("/profile", authMiddleware.protect, userController.getProfile);
 // Protected route: update profile
 router.put("/profile", authMiddleware.protect, userController.updateProfile);
 
+// User preferences
+router.get(
+  "/preferences",
+  authMiddleware.protect,
+  userController.getPreferences,
+);
+router.put(
+  "/preferences",
+  authMiddleware.protect,
+  userController.updatePreferences,
+);
+
 // Protected route: change password
 router.put(
   "/change-password",

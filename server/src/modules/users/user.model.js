@@ -126,7 +126,34 @@ const userSchema = new mongoose.Schema(
       type: [addressSchema],
       default: [],
     },
+    preferences: {
+      language: {
+        type: String,
+        enum: ["en", "ur"],
+        default: "en",
+      },
+      currency: {
+        type: String,
+        enum: ["PKR", "USD"],
+        default: "PKR",
+      },
+      notifications: {
+        orderUpdates: {
+          type: Boolean,
+          default: true,
+        },
+        promotions: {
+          type: Boolean,
+          default: false,
+        },
+        newsletter: {
+          type: Boolean,
+          default: false,
+        },
+      },
+    },
   },
+
   {
     timestamps: true,
   },

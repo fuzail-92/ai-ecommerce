@@ -139,6 +139,21 @@ const activateUser = asyncHandler(async (req, res) => {
   const user = await userService.activateUser(userId);
   res.status(200).json({ success: true, data: user });
 });
+// Get user preferences
+const getPreferences = asyncHandler(async (req, res) => {
+  const preferences = await userService.getUserPreferences(req.user._id);
+  res.status(200).json({ success: true, data: preferences });
+});
+
+// Update user preferences
+const updatePreferences = asyncHandler(async (req, res) => {
+  const preferencesData = req.body;
+  const preferences = await userService.updateUserPreferences(
+    req.user._id,
+    preferencesData,
+  );
+  res.status(200).json({ success: true, data: preferences });
+});
 
 module.exports = {
   getMe,
@@ -153,4 +168,6 @@ module.exports = {
   updateUserRole,
   deactivateUser,
   activateUser,
+  getPreferences,
+  updatePreferences,
 };
