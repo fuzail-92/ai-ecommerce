@@ -6,9 +6,11 @@ const logger = require("./utils/logger");
 
 const config = require("./config/env");
 const connectDB = require("./config/db");
+
 const healthRoutes = require("./modules/health/health.routes");
 const authRoutes = require("./modules/auth/auth.routes");
 const userRoutes = require("./modules/users/user.routes");
+const productRoutes = require("./modules/products/product.routes");
 
 // Create Express app
 const app = express();
@@ -23,15 +25,19 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(morgan("dev"));
 
-// Mount health module
+// Health routes
 app.use("/health", healthRoutes);
 
-// Mount auth module
+// Auth routes
 app.use("/api/v1/auth", authRoutes);
 
+// User routes
 app.use("/api/v1/users", userRoutes);
 
-// 404 handler for unknown routes
+// Product routes
+app.use("/api/v1/products", productRoutes);
+
+// 404 handler
 app.use((req, res, next) => {
   res.status(404).json({
     success: false,
