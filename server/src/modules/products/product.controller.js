@@ -1,7 +1,7 @@
 const productService = require("./product.service");
 const asyncHandler = require("../../utils/asyncHandler");
 
-// Create product (admin only)
+// Create product
 const createProduct = asyncHandler(async (req, res) => {
   const product = await productService.createProduct(req.body);
   res.status(201).json({ success: true, data: product });
@@ -25,13 +25,14 @@ const listProducts = asyncHandler(async (req, res) => {
   res.status(200).json({ success: true, ...result });
 });
 
-// Update product (admin only)
+// Update product
 const updateProduct = asyncHandler(async (req, res) => {
   const product = await productService.updateProduct(req.params.id, req.body);
+
   res.status(200).json({ success: true, data: product });
 });
 
-// Delete product (admin only)
+// Delete product
 const deleteProduct = asyncHandler(async (req, res) => {
   const product = await productService.deleteProduct(req.params.id);
   res.status(200).json({ success: true, data: product });

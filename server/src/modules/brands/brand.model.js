@@ -9,6 +9,7 @@ const brandSchema = new mongoose.Schema(
       unique: true,
       maxlength: [100, "Brand name cannot exceed 100 characters"],
     },
+
     slug: {
       type: String,
       required: [true, "Brand slug is required"],
@@ -16,15 +17,18 @@ const brandSchema = new mongoose.Schema(
       lowercase: true,
       trim: true,
     },
+
     description: {
       type: String,
       trim: true,
       maxlength: [500, "Description cannot exceed 500 characters"],
     },
+
     logo: {
       type: String,
       trim: true,
     },
+
     isActive: {
       type: Boolean,
       default: true,
@@ -34,8 +38,6 @@ const brandSchema = new mongoose.Schema(
     timestamps: true,
   },
 );
-
-brandSchema.index({ slug: 1 });
 
 const Brand = mongoose.model("Brand", brandSchema);
 
