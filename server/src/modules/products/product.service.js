@@ -99,7 +99,7 @@ const listProducts = async ({
 // Update product
 const updateProduct = async (productId, updateData) => {
   const product = await Product.findByIdAndUpdate(productId, updateData, {
-    new: true,
+    returnDocument: "after",
     runValidators: true,
   })
     .populate("category", "name slug")

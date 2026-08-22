@@ -9,6 +9,7 @@ const categorySchema = new mongoose.Schema(
       unique: true,
       maxlength: [100, "Category name cannot exceed 100 characters"],
     },
+
     slug: {
       type: String,
       required: [true, "Category slug is required"],
@@ -16,16 +17,19 @@ const categorySchema = new mongoose.Schema(
       lowercase: true,
       trim: true,
     },
+
     description: {
       type: String,
       trim: true,
       maxlength: [500, "Description cannot exceed 500 characters"],
     },
+
     parent: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Category",
       default: null,
     },
+
     isActive: {
       type: Boolean,
       default: true,
@@ -35,9 +39,6 @@ const categorySchema = new mongoose.Schema(
     timestamps: true,
   },
 );
-
-// Create index on slug for faster lookups
-categorySchema.index({ slug: 1 });
 
 const Category = mongoose.model("Category", categorySchema);
 

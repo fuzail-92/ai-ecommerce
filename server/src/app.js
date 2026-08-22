@@ -12,6 +12,9 @@ const authRoutes = require("./modules/auth/auth.routes");
 const userRoutes = require("./modules/users/user.routes");
 const productRoutes = require("./modules/products/product.routes");
 
+const categoryRoutes = require("./modules/categories/category.routes");
+const brandRoutes = require("./modules/brands/brand.routes");
+
 // Create Express app
 const app = express();
 
@@ -36,6 +39,10 @@ app.use("/api/v1/users", userRoutes);
 
 // Product routes
 app.use("/api/v1/products", productRoutes);
+
+app.use("/api/v1/categories", categoryRoutes);
+
+app.use("/api/v1/brands", brandRoutes);
 
 // 404 handler
 app.use((req, res, next) => {
