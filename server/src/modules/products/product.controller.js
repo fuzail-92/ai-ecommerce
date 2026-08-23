@@ -38,6 +38,12 @@ const deleteProduct = asyncHandler(async (req, res) => {
   res.status(200).json({ success: true, data: product });
 });
 
+// Search products
+const searchProducts = asyncHandler(async (req, res) => {
+  const result = await productService.searchProducts(req.query);
+  res.status(200).json({ success: true, ...result });
+});
+
 module.exports = {
   createProduct,
   getProductById,
@@ -45,4 +51,5 @@ module.exports = {
   listProducts,
   updateProduct,
   deleteProduct,
+  searchProducts,
 };

@@ -185,6 +185,127 @@ const deleteProduct = async (productId) => {
   return product;
 };
 
+// Search products with keyword, filters, sorting, and pagination
+const searchProducts = async ({
+  q,
+  page = 1,
+  limit = 10,
+  sort = "relevance",
+  category,
+  brand,
+  minPrice,
+  maxPrice,
+  status = "active",
+}) => {
+  const query = {};
+
+  // Always search only active products by default
+  if (status) {
+    query.status = status;
+  }
+
+  // Text search
+  if (q) {
+    query.$text = { $search: q };
+  }
+
+  // Category filter (ID or slug)
+  if (category) {
+    if (mongoose.Types.ObjectId.isValid(category)) {
+      query.category = category;
+    } else {
+      const Category = require("../categories/category.model");
+      const foundCategory = await Category.findOne({ slug: category });
+      if (!foundCategory) {
+        throw new AppError("Category not found", 404);
+      }
+      query.category = foundCategory._id;
+    }
+  }
+
+  // Brand filter (ID or slug)
+  if (brand) {
+    if (mongoose.Types.ObjectId.isValid(brand)) {
+      query.brand = brand;
+    } else {
+      const Brand = require("../brands/brand.model");
+      const foundBrand = await Brand.findOne({ slug: brand });
+      if (!foundBrand) {
+        throw new AppError("Brand not found", 404);
+      }
+      query.brand = foundBrand._id;
+    }
+  }
+
+  // Price range
+  if (minPrice !== undefined || maxPrice !== undefined) {
+    query.price = {};
+    if (minPrice !== undefined) query.price.$gte = Number(minPrice);
+    if (maxPrice !== undefined) query.price.$lte = Number(maxPrice);
+  }
+
+  // Sorting
+  let sortOptions = {};
+
+  if (q && sort === "relevance") {
+    // Sort by text score relevance
+    sortOptions = { score: { $meta: "textScore" } };
+  } else {
+    switch (sort) {
+      case "newest":
+        sortOptions = { createdAt: -1 };
+        break;
+      case "oldest":
+        sortOptions = { createdAt: 1 };
+        break;
+      case "price_asc":
+        sortOptions = { price: 1 };
+        break;
+      case "price_desc":
+        sortOptions = { price: -1 };
+        break;
+      default:
+        sortOptions = { createdAt: -1 };
+    }
+  }
+
+  const pageNumber = Number(page);
+  const limitNumber = Number(limit);
+  const skip = (pageNumber - 1) * limitNumber;
+
+  // Find products
+  let products;
+  if (q && sort === "relevance") {
+    products = await Product.find(query, { score: { $meta: "textScore" } })
+      .populate("category", "name slug")
+      .populate("brand", "name slug")
+      .sort(sortOptions)
+      .skip(skip)
+      .limit(limitNumber);
+  } else {
+    products = await Product.find(query)
+      .populate("category", "name slug")
+      .populate("brand", "name slug")
+      .sort(sortOptions)
+      .skip(skip)
+      .limit(limitNumber);
+  }
+
+  const totalProducts = await Product.countDocuments(query);
+  const totalPages = Math.ceil(totalProducts / limitNumber);
+
+  return {
+    searchTerm: q || null,
+    products,
+    pagination: {
+      page: pageNumber,
+      limit: limitNumber,
+      totalProducts,
+      totalPages,
+    },
+  };
+};
+
 module.exports = {
   createProduct,
   getProductById,
@@ -192,4 +313,5 @@ module.exports = {
   listProducts,
   updateProduct,
   deleteProduct,
+  searchProducts,
 };

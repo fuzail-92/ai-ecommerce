@@ -11,6 +11,9 @@ const {
 
 // Public routes
 router.get("/", productController.listProducts);
+
+// Search products
+router.get("/search", productController.searchProducts);
 router.get("/slug/:slug", productController.getProductBySlug);
 router.get("/:id", productController.getProductById);
 
