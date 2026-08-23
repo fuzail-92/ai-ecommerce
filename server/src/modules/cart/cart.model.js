@@ -52,7 +52,6 @@ const cartSchema = new mongoose.Schema(
 );
 
 // Index for user (already unique), but also maybe for future queries
-cartSchema.index({ user: 1 });
 
 const Cart = mongoose.model("Cart", cartSchema);
 
