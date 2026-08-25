@@ -15,7 +15,7 @@ const productRoutes = require("./modules/products/product.routes");
 const categoryRoutes = require("./modules/categories/category.routes");
 const brandRoutes = require("./modules/brands/brand.routes");
 const cartRoutes = require("./modules/cart/cart.routes");
-
+const wishlistRoutes = require("./modules/wishlist/wishlist.routes");
 // Create Express app
 const app = express();
 
@@ -46,6 +46,8 @@ app.use("/api/v1/categories", categoryRoutes);
 app.use("/api/v1/brands", brandRoutes);
 
 app.use("/api/v1/cart", cartRoutes);
+
+app.use("/api/v1/wishlist", wishlistRoutes);
 
 // 404 handler
 app.use((req, res, next) => {
