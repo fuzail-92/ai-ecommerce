@@ -18,6 +18,7 @@ const brandRoutes = require("./modules/brands/brand.routes");
 const cartRoutes = require("./modules/cart/cart.routes");
 const wishlistRoutes = require("./modules/wishlist/wishlist.routes");
 const reviewRoutes = require("./modules/reviews/review.routes");
+const inventoryRoutes = require("./modules/inventory/inventory.routes");
 
 // Create Express app
 const app = express();
@@ -73,6 +74,8 @@ app.use("/api/v1/wishlist", wishlistRoutes);
 
 // Reviews
 app.use("/api/v1/reviews", reviewRoutes);
+
+app.use("/api/v1/inventory", inventoryRoutes);
 
 // ==========================================
 // 404 Handler
