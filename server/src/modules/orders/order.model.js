@@ -95,6 +95,11 @@ const orderSchema = new mongoose.Schema(
       enum: ["PENDING", "PAID", "FAILED", "REFUNDED"],
       default: "PENDING",
     },
+    cancellationReason: {
+      type: String,
+      trim: true,
+      default: null,
+    },
     reservationIds: {
       type: [String],
       default: [],
