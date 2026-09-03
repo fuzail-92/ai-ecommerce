@@ -21,6 +21,7 @@ const reviewRoutes = require("./modules/reviews/review.routes");
 const inventoryRoutes = require("./modules/inventory/inventory.routes");
 const checkoutRoutes = require("./modules/checkout/checkout.routes");
 const orderRoutes = require("./modules/orders/order.routes");
+const paymentRoutes = require("./modules/payments/payment.routes");
 
 // Create Express app
 const app = express();
@@ -82,6 +83,8 @@ app.use("/api/v1/inventory", inventoryRoutes);
 app.use("/api/v1/checkout", checkoutRoutes);
 
 app.use("/api/v1/orders", orderRoutes);
+
+app.use("/api/v1/payments", paymentRoutes);
 
 // ==========================================
 // 404 Handler
