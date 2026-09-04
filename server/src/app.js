@@ -22,6 +22,7 @@ const inventoryRoutes = require("./modules/inventory/inventory.routes");
 const checkoutRoutes = require("./modules/checkout/checkout.routes");
 const orderRoutes = require("./modules/orders/order.routes");
 const paymentRoutes = require("./modules/payments/payment.routes");
+const analyticsRoutes = require("./modules/analytics/analytics.routes");
 
 // Create Express app
 const app = express();
@@ -85,6 +86,8 @@ app.use("/api/v1/checkout", checkoutRoutes);
 app.use("/api/v1/orders", orderRoutes);
 
 app.use("/api/v1/payments", paymentRoutes);
+
+app.use("/api/v1/analytics", analyticsRoutes);
 
 // Temporary test route for background job
 app.get("/test-email", async (req, res) => {
