@@ -1,0 +1,37 @@
+[
+  {
+    "id": "1",
+    "name": "Dell XPS 15 Laptop",
+    "description": "Powerful laptop with Intel i7, 16GB RAM, 512GB SSD, long battery life, good for programming and work.",
+    "category": "Electronics",
+    "price": 299999
+  },
+  {
+    "id": "2",
+    "name": "iPhone 15 Pro",
+    "description": "Latest Apple smartphone with A17 Pro chip, 48MP camera, 5G, OLED display, premium design.",
+    "category": "Mobiles",
+    "price": 339999
+  },
+  {
+    "id": "3",
+    "name": "Sony WH-1000XM5 Headphones",
+    "description": "Wireless noise cancelling headphones with 30 hours battery life, Bluetooth 5.2, excellent sound quality.",
+    "category": "Audio",
+    "price": 89999
+  },
+  {
+    "id": "4",
+    "name": "Samsung 55\" QLED TV",
+    "description": "4K UHD Smart TV with Quantum Dot technology, HDR10+, 120Hz refresh rate, built-in voice assistant.",
+    "category": "TVs",
+    "price": 249999
+  },
+  {
+    "id": "5",
+    "name": "Nike Air Zoom Running Shoes",
+    "description": "Lightweight running shoes with responsive cushioning, breathable mesh upper, durable rubber outsole.",
+    "category": "Sports",
+    "price": 24999
+  }
+]
