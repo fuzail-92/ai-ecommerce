@@ -86,6 +86,17 @@ app.use("/api/v1/orders", orderRoutes);
 
 app.use("/api/v1/payments", paymentRoutes);
 
+// Temporary test route for background job
+app.get("/test-email", async (req, res) => {
+  const { addEmailJob } = require("./utils/queueProducer");
+  const job = await addEmailJob(
+    "test@example.com",
+    "Test Subject",
+    "Test Body",
+  );
+  res.json({ success: true, jobId: job.id });
+});
+
 // ==========================================
 // 404 Handler
 // ==========================================
