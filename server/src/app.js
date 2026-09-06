@@ -23,6 +23,7 @@ const checkoutRoutes = require("./modules/checkout/checkout.routes");
 const orderRoutes = require("./modules/orders/order.routes");
 const paymentRoutes = require("./modules/payments/payment.routes");
 const analyticsRoutes = require("./modules/analytics/analytics.routes");
+const uploadRoutes = require("./modules/uploads/upload.routes");
 
 // Create Express app
 const app = express();
@@ -34,60 +35,34 @@ connectDB();
 // Global Middleware
 // ==========================================
 
-app.use(helmet());
-
+app.use(helmet({ crossOriginResourcePolicy: { policy: "cross-origin" } }));
 app.use(cors());
-
 app.use(express.json());
-
-app.use(
-  express.urlencoded({
-    extended: true,
-  }),
-);
-
+app.use(express.urlencoded({ extended: true }));
 app.use(morgan("dev"));
+
+// Serve uploaded images
+app.use("/uploads", express.static("uploads"));
 
 // ==========================================
 // Routes
 // ==========================================
 
-// Health
 app.use("/health", healthRoutes);
-
-// Auth
 app.use("/api/v1/auth", authRoutes);
-
-// Users
 app.use("/api/v1/users", userRoutes);
-
-// Products
 app.use("/api/v1/products", productRoutes);
-
-// Categories
 app.use("/api/v1/categories", categoryRoutes);
-
-// Brands
 app.use("/api/v1/brands", brandRoutes);
-
-// Cart
 app.use("/api/v1/cart", cartRoutes);
-
-// Wishlist
 app.use("/api/v1/wishlist", wishlistRoutes);
-
-// Reviews
 app.use("/api/v1/reviews", reviewRoutes);
-
 app.use("/api/v1/inventory", inventoryRoutes);
-
 app.use("/api/v1/checkout", checkoutRoutes);
-
 app.use("/api/v1/orders", orderRoutes);
-
 app.use("/api/v1/payments", paymentRoutes);
-
 app.use("/api/v1/analytics", analyticsRoutes);
+app.use("/api/v1/uploads", uploadRoutes);
 
 // Temporary test route for background job
 app.get("/test-email", async (req, res) => {
@@ -119,7 +94,6 @@ app.use((err, req, res, next) => {
   logger.error(err.stack);
 
   const statusCode = err.statusCode || 500;
-
   const message = err.isOperational ? err.message : "Internal Server Error";
 
   res.status(statusCode).json({

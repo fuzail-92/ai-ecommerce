@@ -7,6 +7,7 @@ const variantSchema = new mongoose.Schema(
       type: String,
       required: [true, "Variant SKU is required"],
       unique: true,
+      sparse: true,
       trim: true,
     },
 
@@ -64,6 +65,7 @@ const productSchema = new mongoose.Schema(
       type: String,
       required: [true, "Product slug is required"],
       unique: true,
+      sparse: true,
       lowercase: true,
       trim: true,
     },
