@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+﻿import { useEffect, useState } from 'react';
 import api from '../../services/api';
 import toast from 'react-hot-toast';
 import { Button } from '../ui/button';
@@ -18,6 +18,7 @@ export default function ProductForm({ product = null, onSuccess }) {
   const [categories, setCategories] = useState([]);
   const [brands, setBrands] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [uploading, setUploading] = useState(false);
 
   useEffect(() => {
     if (product) {
@@ -63,6 +64,26 @@ export default function ProductForm({ product = null, onSuccess }) {
   const handleImagesChange = (e) => {
     const value = e.target.value;
     setFormData((prev) => ({ ...prev, images: value.split(',').map((s) => s.trim()).filter(Boolean) }));
+  };
+
+  const handleFileUpload = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    setUploading(true);
+    try {
+      const formData = new FormData();
+      formData.append('image', file);
+      const res = await api.post('/uploads', formData, {
+        headers: { 'Content-Type': 'multipart/form-data' },
+      });
+      const url = res.data.data.imageUrl;
+      setFormData((prev) => ({ ...prev, images: [...prev.images, url] }));
+      toast.success('Image uploaded!');
+    } catch (err) {
+      toast.error('Failed to upload image');
+    } finally {
+      setUploading(false);
+    }
   };
 
   const handleSubmit = async (e) => {
@@ -125,6 +146,11 @@ export default function ProductForm({ product = null, onSuccess }) {
         <div className="md:col-span-2">
           <label className="block text-sm font-medium">Description</label>
           <textarea name="description" value={formData.description} onChange={handleChange} rows="3" className="mt-1 w-full border rounded-md px-3 py-2" />
+        </div>
+        <div className="md:col-span-2">
+          <label className="block text-sm font-medium">Upload Image</label>
+          <input type="file" accept="image/*" onChange={handleFileUpload} className="mt-1 w-full" disabled={uploading} />
+          {uploading && <p className="text-sm text-gray-500">Uploading...</p>}
         </div>
         <div className="md:col-span-2">
           <label className="block text-sm font-medium">Image URLs (comma separated)</label>
