@@ -1,4 +1,5 @@
 ﻿import { useEffect, useState } from 'react';
+import { Link } from 'react-router-dom';
 import api from '../services/api';
 
 export default function Profile() {
@@ -23,7 +24,12 @@ export default function Profile() {
 
   return (
     <div className="max-w-3xl mx-auto space-y-6">
-      <h1 className="text-2xl font-bold">My Profile</h1>
+      <div className="flex justify-between items-center">
+        <h1 className="text-2xl font-bold">My Profile</h1>
+        <Link to="/orders" className="text-blue-600 hover:underline">
+          My Orders
+        </Link>
+      </div>
 
       <div className="bg-white rounded-lg shadow p-6">
         <h2 className="font-semibold mb-4">Personal Information</h2>

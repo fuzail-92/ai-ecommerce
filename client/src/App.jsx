@@ -1,4 +1,4 @@
-﻿import { Routes, Route, Navigate } from 'react-router-dom';
+import { Routes, Route, Navigate } from 'react-router-dom';
 import Layout from './components/Layout';
 import Home from './pages/Home';
 import Login from './pages/Login';
@@ -9,6 +9,7 @@ import Cart from './pages/Cart';
 import Wishlist from './pages/Wishlist';
 import Checkout from './pages/Checkout';
 import Profile from './pages/Profile';
+import OrderHistory from './pages/OrderHistory';
 import AdminDashboard from './pages/AdminDashboard';
 import { useAuth } from './store/authContext';
 
@@ -23,7 +24,7 @@ function App() {
         <Route path="cart" element={<Cart />} />
         <Route path="wishlist" element={<Wishlist />} />
         <Route path="checkout" element={<Checkout />} />
-        <Route path="profile" element={<Profile />} />
+        <Route path="profile" element={<Profile />} />`n        <Route path="orders" element={<OrderHistory />} />
         <Route path="login" element={<Login />} />
         <Route path="register" element={<Register />} />
         <Route
